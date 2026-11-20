@@ -6,12 +6,9 @@ Created on Sun May 12 19:15:34 2019
 """
 
 import adsk, adsk.core, adsk.fusion
-import os.path, re
+import re
 from xml.etree import ElementTree
 from xml.dom import minidom
-import shutil  # Replaced distutils with shutil
-import fileinput
-import sys
 
 def copy_occs(root):    
     """    
@@ -140,43 +137,3 @@ def prettify(elem):
     rough_string = ElementTree.tostring(elem, 'utf-8')
     reparsed = minidom.parseString(rough_string)
     return reparsed.toprettyxml(indent="  ")
-
-
-def copy_package(save_dir, package_dir):
-    try:
-        # Check if the target directory exists, if not, create it
-        if not os.path.exists(save_dir + '/launch'):
-            os.mkdir(save_dir + '/launch')
-        if not os.path.exists(save_dir + '/urdf'):
-            os.mkdir(save_dir + '/urdf')
-        
-        # Check if the package directory exists and copy it
-        if os.path.exists(package_dir):
-            shutil.copytree(package_dir, save_dir, dirs_exist_ok=True)  # dirs_exist_ok=True allows overwriting
-        else:
-            print(f"Package directory '{package_dir}' does not exist.")
-        
-    except Exception as e:
-        print(f"Error copying package: {e}")
-
-
-def update_cmakelists(save_dir, package_name):
-    file_name = save_dir + '/CMakeLists.txt'
-
-    for line in fileinput.input(file_name, inplace=True):
-        if 'project(fusion2urdf)' in line:
-            sys.stdout.write("project(" + package_name + ")\n")
-        else:
-            sys.stdout.write(line)
-
-
-def update_package_xml(save_dir, package_name):
-    file_name = save_dir + '/package.xml'
-
-    for line in fileinput.input(file_name, inplace=True):
-        if '<name>' in line:
-            sys.stdout.write("  <name>" + package_name + "</name>\n")
-        elif '<description>' in line:
-            sys.stdout.write("<description>The " + package_name + " package</description>\n")
-        else:
-            sys.stdout.write(line)
