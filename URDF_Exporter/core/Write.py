@@ -104,42 +104,75 @@ to swap component1<=>component2"
             f.write(joint.joint_xml)
             f.write('\n')
 
-def write_gazebo_endtag(file_name):
+def write_mujocu_endtag(file_name):
     """
-    Write about gazebo_plugin and the </robot> tag at the end of the urdf
+    Write the </mujoco> tag at the end of the mjcf
     
     
     Parameters
     ----------
     file_name: str
-        urdf full path
+        mjcf full path
     """
     with open(file_name, mode='a') as f:
-        f.write('</robot>\n')
+        f.write('</mujoco>\n')
         
 
 def write_urdf(joints_dict, links_xyz_dict, inertial_dict, package_name, robot_name, save_dir):
-    try: os.mkdir(save_dir + '/urdf')
-    except: pass 
 
-    file_name = save_dir + '/urdf/' + robot_name + '.xacro'  # the name of urdf file
+    file_name = save_dir + '/' + robot_name + '.xml'  # the name of mujoco file
     repo = package_name + '/meshes/'  # the repository of binary stl files
     with open(file_name, mode='w') as f:
-        f.write('<?xml version="1.0" ?>\n')
-        f.write('<robot name="{}" xmlns:xacro="http://www.ros.org/wiki/xacro">\n'.format(robot_name))
-        f.write('\n')
-        f.write('<xacro:include filename="$(find {})/urdf/materials.xacro" />'.format(package_name))
-        f.write('\n')
-        f.write('<xacro:include filename="$(find {})/urdf/{}.trans" />'.format(package_name, robot_name))
-        f.write('\n')
-        f.write('<xacro:include filename="$(find {})/urdf/{}.gazebo" />'.format(package_name, robot_name))
-        f.write('\n')
+        f.write('<mujoco model="{}">\n'.format(robot_name))
+        f.write('   <compiler angle="radian"/>\n')
 
     write_link_urdf(joints_dict, repo, links_xyz_dict, file_name, inertial_dict)
     write_joint_urdf(joints_dict, repo, links_xyz_dict, file_name)
-    write_gazebo_endtag(file_name)
+    write_mujocu_endtag(file_name)
 
 
 
+#------------------------------------------------------------------------------------------
+
+
+import adsk, os
+from xml.etree.ElementTree import Element, SubElement
+from . import Link, Joint
+from ..utils import utils
+
+
+def write_asset_mjcf():
+    pass
+
+def write_worldbody_mjcf():
+    pass
+
+
+
+def write_mujocu_endtag(file_name):
+    """
+    Write the </mujoco> tag at the end of the mjcf
+    
+    
+    Parameters
+    ----------
+    file_name: str
+        mjcf full path
+    """
+    with open(file_name, mode='a') as f:
+        f.write('</mujoco>\n')
+        
+
+def write_urdf(joints_dict, links_xyz_dict, inertial_dict, package_name, robot_name, save_dir):
+
+    file_name = save_dir + '/' + robot_name + '.xml'  # the name of mujoco file
+    repo = package_name + '/meshes/'  # the repository of binary stl files
+    with open(file_name, mode='w') as f:
+        f.write('<mujoco model="{}">\n'.format(robot_name))
+        f.write('   <compiler angle="radian"/>\n')
+
+    write_asset_mjcf()
+    write_worldbody_mjcf()
+    write_mujocu_endtag(file_name)
 
 
