@@ -2,10 +2,9 @@
 @author: thewildwt
 """
 
-import adsk, os
+import adsk
 from xml.etree.ElementTree import Element, SubElement
 from . import Asset, Worldbody
-from ..utils import utils
 
 
 def write_asset_mjcf(asset_list , file_name):

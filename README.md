@@ -1,39 +1,6 @@
-# URDF Exporter for Fusion 360
+# MJCF Exporter for Fusion 360
 
 This is a **fork** of the original [syuntoku14/fusion2urdf](https://github.com/syuntoku14/fusion2urdf) repository. 
-
-## **Changes Made**
-- **Python 3.12 Compatibility**: Replaced the deprecated `distutils.dir_util` with `shutil` for directory operations, ensuring compatibility with **Python 3.12** used by Fusion 360.
-- **Error Handling**: Improved error handling to prevent `FileExistsError` when copying directories if they already exist.
-- **Directory Operations**: All directory copying is now done using `shutil.copytree`.
-
-## **Notes**
-- The script is updated for use with **Python 3.12**, as Fusion 360 no longer supports `distutils` in versions above Python 3.10.
-
----
-
-
-
-## Updated!!!
-* 2021/01/09: Fix xyz calculation. 
-  * If you see that your components move arround the map center in rviz try this update 
-  * More Infos see: https://forums.autodesk.com/t5/fusion-360-api-and-scripts/difference-of-geometryororiginone-and-geometryororiginonetwo/m-p/9837767
-
-* 2020/11/10: README fix
-  * MacOS Installation command fixed in README
-  * Date format unified in README to yyyy/dd/mm
-  * Shifted Installation Upwards for better User Experience and easier to find
-* 2020/01/04: Multiple updates:
-  * no longer a need to run a bash script to convert stls
-  * some cleanup around joint and transmission generation
-  * defines a sample material tag instead of defining a material in each link
-  * fusion2urdf now generates a self-contained ROS {robot_name}_description package
-  * now launched by roslaunch {robot_name}_description display.launch
-  * changed fusion2urdf output from urdf to xacro for more flexibility
-  * separate out material, transmissions, gazebo elements to separate files
-* 2018/20/10: Fixed functions to generate launch files
-* 2018/25/09: Supports joint types "Rigid", "Slider" & Supports the joints' limit(for "Revolute" and "Slider"). 
-* 2018/19/09: Fixed the bugs about the center of the mass and the inertia.
 
 
 ## Installation
@@ -43,42 +10,24 @@ Run the following command in your shell.
 ##### Windows (In PowerShell)
 
 ```powershell
-cd <path to fusion2urdf>
+cd <path to fusion2mjcf>
 Copy-Item ".\URDF_Exporter\" -Destination "${env:APPDATA}\Autodesk\Autodesk Fusion 360\API\Scripts\" -Recurse
 ```
 
 ##### macOS (In bash or zsh)
 
 ```bash
-cd <path to fusion2urdf>
+cd <path to fusion2mjcf>
 cp -r ./URDF_Exporter "$HOME/Library/Application Support/Autodesk/Autodesk Fusion 360/API/Scripts/"
 ```
 
 ## What is this script?
-This is a fusion 360 script to export urdf from fusion 360 directly.
+This is a fusion 360 script to export mjcf from fusion 360 directly.
 
 This exports:
-* .urdf file of your model
+* .mjcf file of your model
 * .launch and .yaml files to simulate your robot on gazebo
 * .stl files of your model
-
-### Sample 
-
-The following test model doesn't stand upright because the z axis is not upright in default fusion 360.
-Make sure z axis is upright in your fusion 360 model if you want. 
-
-#### original model
-<img src="https://github.com/syuntoku14/fusion2urdf/blob/images/industrial_robot.png" alt="industrial_robot" title="industrial_robot" width="300" height="300">
-
-#### Gazebo simulation of exported .urdf and .launch
-* center of mass
-<img src="https://github.com/syuntoku14/fusion2urdf/blob/images/center_of_mass.png" alt="center_of_mass" title="center_of_mass" width="300" height="300">
-
-* collision
-<img src="https://github.com/syuntoku14/fusion2urdf/blob/images/collision.png" alt="collision" title="collision" width="300" height="300">
-
-* inertia
-<img src="https://github.com/syuntoku14/fusion2urdf/blob/images/inertia.png" alt="inertia" title="inertia" width="300" height="300">
 
 
 ## Before using this script
