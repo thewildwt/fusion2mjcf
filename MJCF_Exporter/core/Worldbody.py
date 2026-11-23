@@ -50,7 +50,7 @@ def make_body_xml(worldbody_dict):
         inertia_mass = str(key_dict['inertia_mass'])
         inertia_diag = ' '.join([str(_) for _ in key_dict['inertia_diag']])
 
-        geom_pos = ' '.join([str(-_) for _ in key_dict['body_pos']])
+        geom_pos = ' '.join([str(_) for _ in key_dict['geom_pos']])
         geom_mesh = body_name
 
         if key_count != 0:
@@ -111,7 +111,7 @@ def make_worldbody_dict(root, msg):
     ----------
     worldbody_dict: 
         {name: {body_pos , joint_name , joint_axis , joint_type , joint_range, inertia_pos \
-                , inertia_mass , inertia_diag}}
+                , inertia_mass , inertia_diag , geom_pos}}
     msg: str
         Tell the status
     """
@@ -147,6 +147,7 @@ def make_worldbody_dict(root, msg):
     joint_type_list = [
             'fixed', 'revolute', 'prismatic', 'Cylinderical',
             'PinSlot', 'Planner', 'Ball']  # these are the names in urdf
+    last_geom_pos = [0,0,0]
     
     for joint in root.joints:
 
@@ -251,6 +252,10 @@ def make_worldbody_dict(root, msg):
             except:
                 msg = joint.name + " doesn't have joint origin. Please set it and run again."
                 break
+        
+        body_dict['geom_pos'] = [x-y for x ,y in zip(last_geom_pos ,body_dict['body_pos'])]
+        last_geom_pos = body_dict['geom_pos']
+        
         body_dict['joint_name'] = joint.name
     
     

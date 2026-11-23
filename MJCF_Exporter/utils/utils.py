@@ -17,7 +17,7 @@ def copy_occs(root):
         """    
         copy the old occs to new component
         """
-        
+        new_components = []
         bodies = occs.bRepBodies
         transform = adsk.core.Matrix3D.create()
         
@@ -29,7 +29,8 @@ def copy_occs(root):
             occs.component.name = 'old_component'
             new_occs.component.name = 'base_link'
         else:
-            new_occs.component.name = re.sub('[ :()]', '_', occs.name)
+            new_occs.component.name  = re.sub('[ :()]', '_', occs.name)
+            new_components.append(re.sub('[ :()]', '_', occs.name))
         new_occs = allOccs.item((allOccs.count-1))
         for i in range(bodies.count):
             body = bodies.item(i)
@@ -44,7 +45,8 @@ def copy_occs(root):
             oldOccs.append(occs)
 
     for occs in oldOccs:
-        occs.component.name = 'old_component'
+        occs.component.name = 'old_component' 
+
 
 
 def export_stl(design, save_dir, components):  
