@@ -7,6 +7,8 @@ import adsk, re
 from xml.etree.ElementTree import Element, SubElement
 from ..utils import utils
 
+
+
 class Asset:
     def __init__(self, name):
         """

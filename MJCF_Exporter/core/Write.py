@@ -149,9 +149,40 @@ def write_asset_mjcf(asset_list , file_name):
             f.write('\n')
 
 
-def write_worldbody_mjcf():
-    pass
-
+def write_worldbody_mjcf(worldbody_dict, file_name):
+    """
+    Write joints and transmission information into mjcf "robot_name.xml"
+    
+    
+    Parameters
+    ----------
+    worldbody_dict: dict
+        information of each body and joint
+    file_name: str
+        urdf full path
+    """
+    
+    with open(file_name, mode='a') as f:
+        f.write('<worldbody>\n')
+        f.write('<geom quat="1 0 0 0" type="mesh" rgba="0.7 0.7 0.7 1" mesh="base_link"/>\n')
+        
+        last_key = None
+        for key in worldbody_dict:
+            parent = joints_dict[j]['parent']
+            child = joints_dict[j]['child']
+            joint_type = joints_dict[j]['type']
+            upper_limit = joints_dict[j]['upper_limit']
+            lower_limit = joints_dict[j]['lower_limit']
+                
+            joint = Joint.Joint(name=j, joint_type = joint_type, xyz=xyz, \
+            axis=joints_dict[j]['axis'], parent=parent, child=child, \
+            upper_limit=upper_limit, lower_limit=lower_limit)
+            joint.make_joint_xml()
+            joint.make_transmission_xml()
+            f.write(joint.joint_xml)
+            f.write('\n')
+        
+        f.write('</worldbody>\n')
 
 
 def write_mujocu_endtag(file_name):
