@@ -1,0 +1,11 @@
+geom - pos:origin xyz(visual , collision or joint) , quat:"1 0 0 0" , type:"mesh" , rgba:"0.7 0.7 0.7 1"
+body - name:name , pos: - * origin xyz(visual , collision or joint)
+inertial - pos:origin xyz(inertial)  ,quat:{wip}"0.5 0.5 -0.5 0.5" , mass:mass(inertia) , diaginertia:inertia(ixx,iyy,izz)
+joint - name:joint nname , axis: joint axis , joint_type , joint_range
+
+
+
+things to add:
+1. quat for inertial
+2. order of components based on parent and child
+3. rigid joint (add if case)

@@ -1,0 +1,183 @@
+# -*- coding: utf-8 -*-
+"""
+@author: thewildwt
+"""
+
+import adsk, os
+from xml.etree.ElementTree import Element, SubElement
+from . import Link, Joint
+from ..utils import utils
+
+def write_link_urdf(joints_dict, repo, links_xyz_dict, file_name, inertial_dict):
+    """
+    Write links information into urdf "repo/file_name"
+    
+    
+    Parameters
+    ----------
+    joints_dict: dict
+        information of the each joint
+    repo: str
+        the name of the repository to save the xml file
+    links_xyz_dict: vacant dict
+        xyz information of the each link
+    file_name: str
+        urdf full path
+    inertial_dict:
+        information of the each inertial
+    
+    Note
+    ----------
+    In this function, links_xyz_dict is set for write_joint_tran_urdf.
+    The origin of the coordinate of center_of_mass is the coordinate of the link
+    """
+    with open(file_name, mode='a') as f:
+        # for base_link
+        center_of_mass = inertial_dict['base_link']['center_of_mass']
+        link = Link.Link(name='base_link', xyz=[0,0,0], 
+            center_of_mass=center_of_mass, repo=repo,
+            mass=inertial_dict['base_link']['mass'],
+            inertia_tensor=inertial_dict['base_link']['inertia'])
+        links_xyz_dict[link.name] = link.xyz
+        link.make_link_xml()
+        f.write(link.link_xml)
+        f.write('\n')
+
+        # others
+        for joint in joints_dict:
+            name = joints_dict[joint]['child']
+            center_of_mass = \
+                [ i-j for i, j in zip(inertial_dict[name]['center_of_mass'], joints_dict[joint]['xyz'])]
+            link = Link.Link(name=name, xyz=joints_dict[joint]['xyz'],\
+                center_of_mass=center_of_mass,\
+                repo=repo, mass=inertial_dict[name]['mass'],\
+                inertia_tensor=inertial_dict[name]['inertia'])
+            links_xyz_dict[link.name] = link.xyz            
+            link.make_link_xml()
+            f.write(link.link_xml)
+            f.write('\n')
+
+
+def write_joint_urdf(joints_dict, repo, links_xyz_dict, file_name):
+    """
+    Write joints and transmission information into urdf "repo/file_name"
+    
+    
+    Parameters
+    ----------
+    joints_dict: dict
+        information of the each joint
+    repo: str
+        the name of the repository to save the xml file
+    links_xyz_dict: dict
+        xyz information of the each link
+    file_name: str
+        urdf full path
+    """
+    
+    with open(file_name, mode='a') as f:
+        for j in joints_dict:
+            parent = joints_dict[j]['parent']
+            child = joints_dict[j]['child']
+            joint_type = joints_dict[j]['type']
+            upper_limit = joints_dict[j]['upper_limit']
+            lower_limit = joints_dict[j]['lower_limit']
+            try:
+                xyz = [round(p-c, 6) for p, c in \
+                    zip(links_xyz_dict[parent], links_xyz_dict[child])]  # xyz = parent - child
+            except KeyError as ke:
+                app = adsk.core.Application.get()
+                ui = app.userInterface
+                ui.messageBox("There seems to be an error with the connection between\n\n%s\nand\n%s\n\nCheck \
+whether the connections\nparent=component2=%s\nchild=component1=%s\nare correct or if you need \
+to swap component1<=>component2"
+                % (parent, child, parent, child), "Error!")
+                quit()
+                
+            joint = Joint.Joint(name=j, joint_type = joint_type, xyz=xyz, \
+            axis=joints_dict[j]['axis'], parent=parent, child=child, \
+            upper_limit=upper_limit, lower_limit=lower_limit)
+            joint.make_joint_xml()
+            joint.make_transmission_xml()
+            f.write(joint.joint_xml)
+            f.write('\n')
+
+def write_mujocu_endtag(file_name):
+    """
+    Write the </mujoco> tag at the end of the mjcf
+    
+    
+    Parameters
+    ----------
+    file_name: str
+        mjcf full path
+    """
+    with open(file_name, mode='a') as f:
+        f.write('</mujoco>\n')
+        
+
+def write_urdf(joints_dict, links_xyz_dict, inertial_dict, package_name, robot_name, save_dir):
+
+    file_name = save_dir + '/' + robot_name + '.xml'  # the name of mujoco file
+    repo = package_name + '/meshes/'  # the repository of binary stl files
+    with open(file_name, mode='w') as f:
+        f.write('<mujoco model="{}">\n'.format(robot_name))
+        f.write('   <compiler angle="radian"/>\n')
+
+    write_link_urdf(joints_dict, repo, links_xyz_dict, file_name, inertial_dict)
+    write_joint_urdf(joints_dict, repo, links_xyz_dict, file_name)
+    write_mujocu_endtag(file_name)
+
+
+
+#------------------------------------------------------------------------------------------
+
+
+import adsk, os
+from xml.etree.ElementTree import Element, SubElement
+from . import Asset, Worldbody
+from ..utils import utils
+
+
+def write_asset_mjcf(asset_list , file_name):
+    with open(file_name, mode='a') as f:
+        for component in asset_list:
+            name = component
+            asset = Asset.Asset(name=name)     
+            asset.make_asset_xml()
+            f.write(asset.asset_xml)
+            f.write('\n')
+
+
+def write_worldbody_mjcf():
+    pass
+
+
+
+def write_mujocu_endtag(file_name):
+    """
+    Write the </mujoco> tag at the end of the mjcf
+    
+    
+    Parameters
+    ----------
+    file_name: str
+        mjcf full path
+    """
+    with open(file_name, mode='a') as f:
+        f.write('</mujoco>\n')
+        
+
+def write_mjcf(joints_dict, asset_list , package_name, robot_name, save_dir):
+
+    file_name = save_dir + '/' + robot_name + '.xml'  # the name of mujoco file
+    repo = package_name + '/meshes/'  # the repository of binary stl files
+    with open(file_name, mode='w') as f:
+        f.write('<mujoco model="{}">\n'.format(robot_name))
+        f.write('   <compiler angle="radian"/>\n')
+
+    write_asset_mjcf(asset_list , file_name)
+    write_worldbody_mjcf()
+    write_mujocu_endtag(file_name)
+
+
