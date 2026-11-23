@@ -98,7 +98,7 @@ from .core import Asset, Worldbody, Write
 
 def run(context):
     ui = None
-    success_msg = 'Successfully create URDF file'
+    success_msg = 'Successfully create MJCF file'
     msg = success_msg
     
     try:
@@ -121,7 +121,7 @@ def run(context):
         package_name = robot_name + '_description'
         save_dir = utils.file_dialog(ui)
         if save_dir == False:
-            ui.messageBox('Fusion2URDF was canceled', title)
+            ui.messageBox('Fusion2MJCF was canceled', title)
             return 0
         
         save_dir = save_dir + '/' + package_name
@@ -133,8 +133,8 @@ def run(context):
         # --------------------
         # set dictionaries
         
-        # Generate joints_dict. All joints are related to root. 
-        joints_dict, msg = Joint.make_joints_dict(root, msg)
+        # Generate worldbody_dict
+        worldbody_dict, msg = Worldbody.make_worldbody_dict(root, msg)
         if msg != success_msg:
             ui.messageBox(msg, title)
             return 0   
@@ -150,8 +150,8 @@ def run(context):
             return 0
         
         # --------------------
-        # Generate URDF
-        Write.write_mjcf(joints_dict, asset_list, package_name, robot_name, save_dir)
+        # Generate MJCF
+        Write.write_mjcf(worldbody_dict, asset_list, package_name, robot_name, save_dir)
         
     
         # Generate STl files        
