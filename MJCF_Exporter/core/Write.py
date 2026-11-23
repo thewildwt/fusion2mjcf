@@ -9,12 +9,9 @@ from . import Asset, Worldbody
 
 def write_asset_mjcf(asset_list , file_name):
     with open(file_name, mode='a') as f:
-        for component in asset_list:
-            name = component
-            asset = Asset.Asset(name=name)     
-            asset.make_asset_xml()
-            f.write(asset.asset_xml)
-            f.write('\n')
+        asset = Asset.make_asset_xml(asset_list)
+        f.write(asset)
+        f.write('\n')
 
 
 def write_worldbody_mjcf(worldbody_dict, file_name):

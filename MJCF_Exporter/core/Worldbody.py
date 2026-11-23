@@ -24,10 +24,11 @@ def make_body_xml(worldbody_dict):
              'type':geom_type ,
              'rgba':geom_rgba ,
              'mesh':'base_link'}
-
     
+
     body_tree = {} # to store the subelemnt to access later
     key_count = 0 # index of the element to access
+
 
     for key in worldbody_dict:
         
@@ -46,7 +47,7 @@ def make_body_xml(worldbody_dict):
                 [ i-j for i, j in zip(key_dict['inertia_pos'],key_dict['body_pos'])]
         inertia_pos = ' '.join([str(_) for _ in inertia_pos])
         
-        inertia_mass = key_dict['inertia_mass']
+        inertia_mass = str(key_dict['inertia_mass'])
         inertia_diag = ' '.join([str(_) for _ in key_dict['inertia_diag']])
 
         geom_pos = ' '.join([str(-_) for _ in key_dict['body_pos']])
@@ -85,9 +86,13 @@ def make_body_xml(worldbody_dict):
             'rgba': geom_rgba,
             'mesh': geom_mesh
             }
+        key_count += 1
+        
    
     worldbody_xml = "\n".join(utils.prettify(worldbody).split("\n")[1:])
+    
     return worldbody_xml
+
 
 
 def make_worldbody_dict(root, msg):
@@ -246,3 +251,7 @@ def make_worldbody_dict(root, msg):
             except:
                 msg = joint.name + " doesn't have joint origin. Please set it and run again."
                 break
+        body_dict['joint_name'] = joint.name
+    
+    
+    return worldbody_dict , msg
