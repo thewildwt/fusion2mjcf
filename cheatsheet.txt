@@ -7,7 +7,6 @@ joint - name:joint nname , axis: joint axis , joint_type , joint_range
 
 things to add:
 1. quat for inertial tag
-2. order of components based on parent and child
+2. order of components based on parent and child (currently order is linear)
 3. rigid joint (add if case)
-4. error message when joints xyz dont match
-5. recalculate other parts positionn if base link is not at origin?
+4. recalculate other parts positionn if base link is not at origin?

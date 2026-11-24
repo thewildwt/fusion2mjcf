@@ -15,7 +15,6 @@ def make_body_xml(worldbody_dict):
     geom_quat = "1 0 0 0"
     geom_type = "mesh"
     geom_rgba = "0.7 0.7 0.7 1"
-    inertia_quat = "0.5 0.5 -0.5 0.5"
     
     worldbody= Element('worldbody')
     geom = SubElement(worldbody , 'geom')
@@ -44,11 +43,11 @@ def make_body_xml(worldbody_dict):
         joint_range = ' '.join([str(_) for _ in key_dict['joint_range']])
 
         inertia_pos =  \
-                [ i-j for i, j in zip(key_dict['inertia_pos'],key_dict['body_pos'])]
+                [ i-j for i, j in zip(key_dict['inertia_pos'],key_dict['world_body_pos'])]
         inertia_pos = ' '.join([str(_) for _ in inertia_pos])
         
         inertia_mass = str(key_dict['inertia_mass'])
-        inertia_diag = ' '.join([str(_) for _ in key_dict['inertia_diag']])
+        inertia_full = ' '.join([str(_) for _ in key_dict['inertia_full']])
 
         geom_pos = ' '.join([str(_) for _ in key_dict['geom_pos']])
         geom_mesh = body_name
@@ -65,9 +64,8 @@ def make_body_xml(worldbody_dict):
         inertial = SubElement(body_tree[key_count] , 'inertial')
         inertial.attrib = \
             {'pos': inertia_pos,
-             'quat': inertia_quat,
              'mass': inertia_mass,
-             'diaginertia':inertia_diag
+             'fullinertia':inertia_full
              }
         
         joint = SubElement(body_tree[key_count] , 'joint')
@@ -110,8 +108,8 @@ def make_worldbody_dict(root, msg):
     Returns
     ----------
     worldbody_dict: 
-        {name: {body_pos , joint_name , joint_axis , joint_type , joint_range, inertia_pos \
-                , inertia_mass , inertia_diag , geom_pos}}
+        {name: {body_pos , world_body_pos, joint_name , joint_axis , joint_type , joint_range, inertia_pos \
+                , inertia_mass , inertia_full , geom_pos}}
     msg: str
         Tell the status
     """
@@ -137,7 +135,7 @@ def make_worldbody_dict(root, msg):
             (_, xx, yy, zz, xy, yz, xz) = prop.getXYZMomentsOfInertia()
             moment_inertia_world = [_ / 10000.0 for _ in [xx, yy, zz, xy, yz, xz] ] ## kg / cm^2 -> kg/m^2
             inertia_tensor = utils.origin2center_of_mass(moment_inertia_world, center_of_mass, mass)
-            body_dict['inertia_diag'] = inertia_tensor[:3] #grabs only the ixx , iyy , izz
+            body_dict['inertia_full'] = inertia_tensor
 
             worldbody_dict[re.sub('[ :()]', '_', occs.name)] = body_dict
 
@@ -147,8 +145,8 @@ def make_worldbody_dict(root, msg):
     joint_type_list = [
             'fixed', 'revolute', 'prismatic', 'Cylinderical',
             'PinSlot', 'Planner', 'Ball']  # these are the names in urdf
-    last_geom_pos = [0,0,0]
-    
+
+    body_pos = [[0,0,0]]
     for joint in root.joints:
 
         #the name is of the child in the joint
@@ -240,7 +238,7 @@ def make_worldbody_dict(root, msg):
                 xyz_of_joint = trans(M_two, xyz_from_two_to_joint)
 
 
-            body_dict['body_pos'] = [round(i / 100.0, 6) for i in xyz_of_joint]  # converted to meter
+            body_dict['world_body_pos'] = [round(i / 100.0, 6) for i in xyz_of_joint]  # converted to meter
 
         except:
             try:
@@ -248,15 +246,38 @@ def make_worldbody_dict(root, msg):
                     data = joint.geometryOrOriginTwo.geometry.origin.asArray()
                 else:
                     data = joint.geometryOrOriginTwo.origin.asArray()
-                body_dict['body_pos'] = [round(i / 100.0, 6) for i in data]  # converted to meter
+                body_dict['world_body_pos'] = [round(i / 100.0, 6) for i in data]  # converted to meter
             except:
                 msg = joint.name + " doesn't have joint origin. Please set it and run again."
                 break
+
+        body_pos.append(body_dict['world_body_pos'])
+        body_dict['joint_name'] = joint.name
+    
+    last_geom_pos = [0,0,0]
+    count = 0
+
+    for joint in root.joints:
+        #the name is of the child in the joint
+        child_name = re.sub('[ :()]', '_', joint.occurrenceOne.name)
+        
+        body_dict = worldbody_dict[child_name]
+        
+        
+        try:
+            body_dict['body_pos'] = [round(c-p, 6) for p, c in \
+                zip(body_pos[count], body_pos[count+1])]  # xyz = parent - child
+        except KeyError as ke:
+            app = adsk.core.Application.get()
+            ui = app.userInterface
+            ui.messageBox("There seems to be an error with the connection")
+            quit()
+
         
         body_dict['geom_pos'] = [x-y for x ,y in zip(last_geom_pos ,body_dict['body_pos'])]
         last_geom_pos = body_dict['geom_pos']
-        
-        body_dict['joint_name'] = joint.name
+    
+        count += 1
     
     
     return worldbody_dict , msg
