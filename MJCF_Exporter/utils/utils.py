@@ -5,7 +5,7 @@
 """
 
 import adsk, adsk.core, adsk.fusion
-import re
+import os , re
 from xml.etree import ElementTree
 from xml.dom import minidom
 
