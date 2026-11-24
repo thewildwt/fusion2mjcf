@@ -3,30 +3,11 @@
 This is a **fork** of the original [syuntoku14/fusion2urdf](https://github.com/syuntoku14/fusion2urdf) repository. 
 
 
-## Installation
-
-Run the following command in your shell.
-
-##### Windows (In PowerShell)
-
-```powershell
-cd <path to fusion2mjcf>
-Copy-Item ".\URDF_Exporter\" -Destination "${env:APPDATA}\Autodesk\Autodesk Fusion 360\API\Scripts\" -Recurse
-```
-
-##### macOS (In bash or zsh)
-
-```bash
-cd <path to fusion2mjcf>
-cp -r ./URDF_Exporter "$HOME/Library/Application Support/Autodesk/Autodesk Fusion 360/API/Scripts/"
-```
-
 ## What is this script?
 This is a fusion 360 script to export mjcf from fusion 360 directly.
 
 This exports:
 * .mjcf file of your model
-* .launch and .yaml files to simulate your robot on gazebo
 * .stl files of your model
 
 
@@ -79,7 +60,7 @@ See Also: Similar to this issue, but only for a few axes [here](https://github.c
 **The fix for this is to leave Fusion's joint controls unedited and form joints for the robot joints (See below)**
 
 
-A similar issue with another set of joints at the ankle was fixed by following the above fromat. [Here is the video](https://www.youtube.com/watch?v=0hfkm7vv5o8&ab_channel=JRohit)
+A similar issue with another set of joints at the ankle was fixed by following the above format. [Here is the video](https://www.youtube.com/watch?v=0hfkm7vv5o8&ab_channel=JRohit)
 
 For spherical joints, it is better to keep them revolute and define the joints as spherical, later in the generated URDF(provided the urdf parser in your visualizer/physics engine(gazebo,webots,pybullet,mujoco,etc) supports spherical joints, in pybullet it does).
 The ankle joint below has 4 spherical joints and only two of them were defined as revolute while exporting from fusion 360. The other 2 spherical joints were created in pybullet using pybullet's inbuilt functions for creating kinematic loops.(see the gif below)
@@ -125,34 +106,7 @@ Now you can run the script. Let's run the script. Choose the folder to save and 
 
 <img src="https://github.com/syuntoku14/fusion2urdf/blob/images/result.PNG" alt="results" title="results" width="250" height="300">
 
-You have successfully exported the urdf file. Also, you got `.stl` files in the "Desktop/test/mm_stl" repository. This will be required at the next step. The existing fusion CAD file is no more needed. You can delete it. 
-
-The folder "Desktop/test" will be required in the next step. Move them into your ros environment.
-
-
-#### In your ROS environment
-
-Place the generated _description package directory in your own ROS workspace. "catkin_ws" is used in this example.
-Then, run catkin_make in catkin_ws.
-
-```bash
-cd ~/catkin_ws/
-catkin_make
-source devel/setup.bash
-```
-
-Now you can see your robot in rviz. You can see it by the following command.
-
-```bash
-roslaunch (whatever your robot_name is)_description display.launch
-```
-
-<img src="https://github.com/syuntoku14/fusion2urdf/blob/images/rviz_robot.png" alt="rviz" title="rviz" width="300" height="300">
-
-If you want to simulate your robot on gazebo, just run
-```bash
-roslaunch (whatever your robot_name is)_description gazebo.launch
-```
+You have successfully exported the mjcf file. Also, you got `.stl` files in the "Desktop/test/mm_stl" repository. 
 
 **Enjoy your Fusion 360 and ROS life!**
 
